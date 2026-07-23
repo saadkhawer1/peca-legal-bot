@@ -139,3 +139,12 @@ function scrollToBottom() {
     const chatContainer = document.getElementById('chat-container');
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+    const chatContainer = document.getElementById('chat-container');
+    const welcomeMessage = chatContainer.firstElementChild;
+    chatContainer.innerHTML = '';
+    if (welcomeMessage) {
+        chatContainer.appendChild(welcomeMessage);
+    }
+});
