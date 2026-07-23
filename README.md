@@ -197,6 +197,7 @@ Run:
 ```bash
 python src/ingest.py
 ```
+**Chunking Strategy:** I used `RecursiveCharacterTextSplitter` with natural legal boundaries (paragraphs, newlines) and a chunk size of 2500 characters with an overlap of 500 characters. This ensures legal clauses (like definitions and penalties) aren't split mid-sentence, preserving context.
 
 This script performs:
 
@@ -363,8 +364,24 @@ uvicorn src.main:app --reload
 
 Open
 
-```
+```text
 http://localhost:8000
+```
+
+## API Endpoints
+- `POST /ask`: Accepts a JSON body `{"query": "your question"}` and returns a grounded response, boolean scope flag, and sources list.
+- `GET /health`: Returns `{ "status": "healthy" }`.
+
+## Sample Outputs
+
+**In-Scope Query:**
+*User:* "What is the penalty for cyber terrorism?"
+*Bot:* "Based on the provided document, anyone who commits cyber terrorism shall be punished with imprisonment of either description for a term which may extend to fourteen years, or with a fine which may extend to fifty million rupees, or with both (Source: Page 6)."
+
+**Out-of-Scope Query:**
+*User:* "What is the capital of France?"
+*Bot:* "I can only answer questions about the Prevention of Electronic Crimes Act, 2016 (PECA). That question is outside what I have information on."
+
 ```
 
 Swagger Documentation
