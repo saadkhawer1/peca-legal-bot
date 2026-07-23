@@ -1,75 +1,438 @@
-# RAG Chatbot on Pakistani Law (PECA 2016)
+# 🇵🇰 RAG Chatbot on Pakistani Law (PECA 2016)
 
-This project is a Retrieval-Augmented Generation (RAG) chatbot focused specifically on **The Prevention of Electronic Crimes Act, 2016 (PECA)** of Pakistan. It was built for the AI Summer Internship 2026.
+A Retrieval-Augmented Generation (RAG) chatbot that answers questions **only** about the **Prevention of Electronic Crimes Act (PECA), 2016** of Pakistan.
 
-## Technologies Used
-- **Backend Framework:** FastAPI
-- **LLM Orchestration:** LangChain & LangGraph
-- **LLM:** Google Gemini 1.5 Flash (via `langchain-google-genai`)
-- **Embeddings:** HuggingFace `sentence-transformers/all-MiniLM-L6-v2` (Local, free)
-- **Vector Database:** ChromaDB
-- **Validation:** Pydantic
-- **Frontend:** Vanilla HTML/CSS/JS with a modern glassmorphism design.
-- **Containerization:** Docker
+This project was developed as part of the **AI Summer Internship 2026** assignment. The chatbot retrieves relevant sections from the official PECA document using semantic search and generates grounded responses using Google's Gemini LLM. Unlike a traditional chatbot, it does not rely on general knowledge and only answers questions supported by the selected law.
 
-## Setup Instructions
+---
 
-### 1. Prerequisites
-- Python 3.10+
-- A Google Gemini API Key
+# 📌 Project Objective
 
-### 2. Installation
-Clone the repository and install dependencies:
+The goal of this project is to build a trustworthy legal chatbot using the Retrieval-Augmented Generation (RAG) architecture.
+
+The chatbot:
+
+- Reads the official PECA 2016 PDF
+- Splits the document into meaningful chunks
+- Converts chunks into vector embeddings
+- Stores embeddings in ChromaDB
+- Retrieves the most relevant legal sections
+- Uses Google Gemini to generate grounded answers
+- Rejects questions outside the scope of PECA
+
+---
+
+# 📚 Selected Law
+
+**Law Name**
+
+Prevention of Electronic Crimes Act (PECA), 2016
+
+**Country**
+
+Pakistan
+
+**Document Source**
+
+Official Ministry of Law and Justice, Government of Pakistan
+
+**Document Format**
+
+PDF
+
+---
+
+# 🚀 Technologies Used
+
+| Technology | Purpose |
+|------------|---------|
+| Python | Programming Language |
+| FastAPI | REST API Backend |
+| LangChain | LLM Orchestration |
+| LangGraph | Workflow Pipeline |
+| Google Gemini 1.5 Flash | Large Language Model |
+| HuggingFace MiniLM-L6-v2 | Text Embeddings |
+| ChromaDB | Vector Database |
+| Pydantic | Data Validation |
+| HTML/CSS/JavaScript | Chat Frontend |
+| Docker | Containerization |
+
+---
+
+# 🧠 What is RAG?
+
+Retrieval-Augmented Generation (RAG) is an AI architecture that combines information retrieval with a Large Language Model.
+
+Instead of allowing the model to answer from its own memory, the chatbot first retrieves the most relevant sections of the legal document and then generates an answer using only those sections.
+
+This approach greatly reduces hallucinations and improves answer reliability.
+
+---
+
+# 🔄 System Architecture
+
+```text
+                User Question
+                      │
+                      ▼
+             Scope Classification
+                      │
+        ┌─────────────┴─────────────┐
+        │                           │
+ Out of Scope                 In Scope
+        │                           │
+ Decline Response                  ▼
+                           Retrieve Chunks
+                                  │
+                                  ▼
+                         Chroma Vector Search
+                                  │
+                                  ▼
+                         Relevant Legal Sections
+                                  │
+                                  ▼
+                        Prompt Construction
+                                  │
+                                  ▼
+                        Google Gemini 1.5 Flash
+                                  │
+                                  ▼
+                       Grounded Final Response
+                                  │
+                                  ▼
+                          FastAPI Response
+```
+
+---
+
+# 📂 Project Structure
+
+```text
+PECA-RAG-Chatbot/
+│
+├── data/
+│   └── PECA_2016.pdf
+│
+├── chroma_db/
+│
+├── src/
+│   ├── ingest.py
+│   ├── retriever.py
+│   ├── graph.py
+│   ├── schemas.py
+│   ├── prompts.py
+│   ├── embeddings.py
+│   ├── main.py
+│   └── utils.py
+│
+├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── script.js
+│
+├── tests/
+│   └── eval.py
+│
+├── requirements.txt
+├── Dockerfile
+├── .gitignore
+├── .env
+└── README.md
+```
+
+---
+
+# ⚙️ Installation
+
+## 1. Clone Repository
+
+```bash
+git clone https://github.com/yourusername/PECA-RAG-Chatbot.git
+
+cd PECA-RAG-Chatbot
+```
+
+---
+
+## 2. Create Virtual Environment
+
 ```bash
 python -m venv .venv
-# Activate environment
-# On Windows:
-.venv\Scripts\activate
-# On Linux/Mac:
-# source .venv/bin/activate
+```
 
+### Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+source .venv/bin/activate
+```
+
+---
+
+## 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 3. Environment Variables
-Create a `.env` file in the root directory and add your API key:
+---
+
+## 4. Create .env File
+
 ```env
 GEMINI_API_KEY=your_api_key_here
 ```
 
-### 4. Data Ingestion
-Run the ingestion script to load the PDF, chunk it, generate embeddings, and store them in ChromaDB.
+---
+
+# 📄 Document Ingestion
+
+Run:
+
 ```bash
 python src/ingest.py
 ```
-**Chunking Strategy:** I used `RecursiveCharacterTextSplitter` with natural legal boundaries (paragraphs, newlines) and a chunk size of 1000 characters with an overlap of 200 characters. This ensures legal clauses aren't split mid-sentence, preserving context.
 
-### 5. Running the API & Chat UI
-Start the FastAPI server:
+This script performs:
+
+- Loads the PECA PDF
+- Extracts text
+- Cleans the content
+- Splits document into chunks
+- Generates embeddings
+- Stores vectors inside ChromaDB
+
+---
+
+# ✂️ Chunking Strategy
+
+The chatbot uses **RecursiveCharacterTextSplitter** provided by LangChain.
+
+Configuration:
+
+```python
+Chunk Size = 1000 Characters
+
+Chunk Overlap = 200 Characters
+```
+
+### Why these values?
+
+- Prevents legal clauses from breaking
+- Preserves surrounding context
+- Improves retrieval quality
+- Reduces hallucinations
+
+Natural separators such as paragraphs and line breaks are preferred over blind character splitting.
+
+---
+
+# 🧠 Embedding Model
+
+Model Used
+
+```
+sentence-transformers/all-MiniLM-L6-v2
+```
+
+Advantages
+
+- Free
+- Lightweight
+- Fast
+- High semantic similarity performance
+
+---
+
+# 🗄️ Vector Database
+
+Vector Store
+
+```
+ChromaDB
+```
+
+Stores:
+
+- Embedding vectors
+- Chunk metadata
+- Page numbers
+- Source references
+
+---
+
+# 🤖 LLM
+
+Model
+
+```
+Google Gemini 1.5 Flash
+```
+
+Responsibilities
+
+- Receives retrieved chunks
+- Generates grounded responses
+- Never answers outside retrieved context
+
+---
+
+# 🛡️ Scope Guardrails
+
+The chatbot answers questions **only** about PECA 2016.
+
+Out-of-scope examples:
+
+- What is Chemistry?
+- Who is Ronaldo?
+- Explain Machine Learning.
+- Tell me about Company Law.
+- What is the capital of Pakistan?
+
+Such questions receive a polite refusal instead of a fabricated answer.
+
+---
+
+# 📌 Features
+
+- PDF-based knowledge retrieval
+- Semantic search using embeddings
+- Chroma vector database
+- Google Gemini integration
+- LangGraph workflow
+- Source citations
+- Scope guardrails
+- Pydantic validation
+- FastAPI backend
+- Responsive chat interface
+- Docker support
+
+---
+
+# 🌐 API Endpoints
+
+## POST /ask
+
+Request
+
+```json
+{
+  "query": "What is cyber stalking?"
+}
+```
+
+Response
+
+```json
+{
+  "answer":"Cyber stalking is defined under...",
+  "is_scope":true,
+  "sources":[
+      "Section 24",
+      "Page 17"
+  ]
+}
+```
+
+---
+
+## GET /health
+
+Response
+
+```json
+{
+  "status":"healthy"
+}
+```
+
+---
+
+# 💻 Running the Application
+
+Start FastAPI
+
 ```bash
 uvicorn src.main:app --reload
 ```
-Open `http://localhost:8000` in your browser to use the chatbot UI.
 
-## Features
-- **Strict Scope Guardrails:** A LangGraph pipeline classifies the user's intent before retrieval. If the query is out-of-scope (e.g., general knowledge), the bot politely declines.
-- **Source Citations:** Every generated answer cites the specific chunks/pages retrieved from the PDF.
-- **Structured Outputs:** Uses Pydantic for validating all requests and responses throughout the pipeline.
+Open
 
-## API Endpoints
-- `POST /ask`: Accepts a JSON body `{"query": "your question"}` and returns a grounded response, boolean scope flag, and sources list.
-- `GET /health`: Returns `{ "status": "healthy" }`.
-
-## Docker
-To run using Docker:
-```bash
-docker build -t peca-chatbot .
-docker run -p 8000:8000 --env-file .env peca-chatbot
+```
+http://localhost:8000
 ```
 
-## Testing
-Run the evaluation suite (Task 8):
+Swagger Documentation
+
+```
+http://localhost:8000/docs
+```
+
+---
+
+# 🧪 Testing
+
+Run
+
 ```bash
 python tests/eval.py
 ```
-This tests 15 questions covering in-scope, out-of-scope, tricky, and adversarial cases.
+
+Evaluation includes:
+
+- 5 In-Scope Questions
+- 3 Ambiguous Questions
+- 5 Out-of-Scope Questions
+- 2 Adversarial Questions
+
+Metrics
+
+- Scope Detection Accuracy
+- Grounded Responses
+- Source Citation Accuracy
+- Retrieval Quality
+
+---
+
+# 🐳 Docker
+
+Build Image
+
+```bash
+docker build -t peca-chatbot .
+```
+
+Run Container
+
+```bash
+docker run -p 8000:8000 --env-file .env peca-chatbot
+```
+
+---
+
+# 📈 Future Improvements
+
+- Hybrid Search (BM25 + Vector Search)
+- Conversation Memory
+- OCR Support for scanned legal documents
+- Multi-law support
+- User authentication
+- Feedback collection
+- Citation highlighting
+- PDF upload functionality
+
+---
+
+# 👨‍💻 Author
+
+AI Summer Internship 2026
+
+Project:
+**RAG Chatbot on Pakistani Law (PECA 2016)**
+
+Built using LangChain, LangGraph, FastAPI, ChromaDB and Google Gemini.
