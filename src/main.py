@@ -11,6 +11,13 @@ from pydantic import BaseModel
 from src.models import QueryRequest, ChatbotResponse
 from src.graph import run_chat
 
+"""
+Main Application Module
+-----------------------
+This module initializes the FastAPI server, mounts the static frontend,
+and defines the core endpoints for the PECA 2016 RAG Chatbot.
+"""
+
 app = FastAPI(title="PECA 2016 RAG Chatbot")
 
 # Mount static files
