@@ -14,7 +14,7 @@ from src.retrieve import retrieve
 
 load_dotenv()
 
-# Define the State
+#
 class GraphState(TypedDict):
     query: str
     is_in_scope: bool
@@ -53,8 +53,7 @@ def classify_query(state: GraphState) -> GraphState:
 # Node 2: Retrieve Context
 def retrieve_context(state: GraphState) -> GraphState:
     query = state["query"]
-    chunks = retrieve(query, k=20)
-    
+    chunks = retrieve(query, k=20)\
     # We can also add a retrieval-score gating here if needed, but LLM classification is usually better.
     state["retrieved_chunks"] = chunks
     state["sources"] = list(set([c.source for c in chunks]))

@@ -14,6 +14,7 @@ def get_retriever():
     db = Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
     return db.as_retriever(search_kwargs={"k": 4})
 
+# use in graph.py
 def retrieve(query: str, k: int = 20) -> List[RetrievedChunk]:
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     db = Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
@@ -21,6 +22,8 @@ def retrieve(query: str, k: int = 20) -> List[RetrievedChunk]:
     # We use similarity_search_with_score to potentially use score-based gating
     docs_with_scores = db.similarity_search_with_score(query, k=k)
     
+    # this function retrieves the most relevant legal sections from the ChromaDB
+    # the chunks are then used to generate grounded responses using Google Gemini LLM
     chunks = []
     for doc, score in docs_with_scores:
         chunks.append(RetrievedChunk(

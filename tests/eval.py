@@ -1,5 +1,6 @@
 import os
 import sys
+import csv
 from pydantic import BaseModel
 
 # Add the root project directory to sys.path
@@ -38,39 +39,63 @@ def run_evaluation():
     passed = 0
     total = len(TEST_CASES)
     
-    for i, test in enumerate(TEST_CASES):
-        print(f"[{i+1}/{total}] Question: {test['q']} (Type: {test['type']})")
+    csv_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "eval_results.csv")
+    
+    with open(csv_file, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        # Write CSV Header
+        writer.writerow(["question", "category", "expected_in_scope", "actual_in_scope", "scope_correct", "sources", "answer_preview"])
         
-        try:
-            response = run_chat(test['q'])
+        for i, test in enumerate(TEST_CASES):
+            print(f"[{i+1}/{total}] Question: {test['q']} (Type: {test['type']})")
             
-            print(f"  Is in Scope: {response.is_in_scope}")
-            print(f"  Answer: {response.answer[:100]}...")
-            print(f"  Sources cited: {len(response.sources)}")
-            
-            # Basic validation
-            is_pass = False
-            if test['type'] == "in-scope" or test['type'] == "in-scope_tricky":
-                # Should be in scope
-                if response.is_in_scope:
-                    is_pass = True
-            elif test['type'] == "out-of-scope" or test['type'] == "adversarial":
-                # Should be out of scope, or if in scope, should decline to answer
-                if not response.is_in_scope or "I don't have enough information" in response.answer:
-                    is_pass = True
-            
-            if is_pass:
-                print("  => PASS")
-                passed += 1
-            else:
-                print("  => FAIL")
+            try:
+                response = run_chat(test['q'])
                 
-        except Exception as e:
-            print(f"  => ERROR: {e}")
+                print(f"  Is in Scope: {response.is_in_scope}")
+                print(f"  Answer: {response.answer[:100]}...")
+                print(f"  Sources cited: {len(response.sources)}")
+                
+                # Basic validation
+                is_pass = False
+                expected_scope = True
+                
+                if test['type'] == "in-scope" or test['type'] == "in-scope_tricky":
+                    if response.is_in_scope:
+                        is_pass = True
+                elif test['type'] == "out-of-scope" or test['type'] == "adversarial":
+                    expected_scope = False
+                    if not response.is_in_scope or "I don't have enough information" in response.answer:
+                        is_pass = True
+                
+                if is_pass:
+                    print("  => PASS")
+                    passed += 1
+                else:
+                    print("  => FAIL")
+                    
+                # Write row to CSV
+                writer.writerow([
+                    test['q'], 
+                    test['type'], 
+                    expected_scope, 
+                    response.is_in_scope, 
+                    is_pass, 
+                    "; ".join(response.sources), 
+                    response.answer[:150]
+                ])
+                    
+            except Exception as e:
+                print(f"  => ERROR: {e}")
+                
+            print("-" * 50)
             
-        print("-" * 50)
-        
+            # Add a small delay to avoid hitting the free tier 15 requests/minute rate limit
+            import time
+            time.sleep(4)
+            
     print(f"\nFinal Score: {passed}/{total} ({(passed/total)*100:.1f}%)")
+    print(f"Results saved to {csv_file}")
 
 if __name__ == "__main__":
     run_evaluation()

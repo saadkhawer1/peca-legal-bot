@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+# pydantic models for type safety and validation and also check the format of data
 class QueryRequest(BaseModel):
     query: str = Field(..., description="The user's question about the PECA 2016 law.")
 
