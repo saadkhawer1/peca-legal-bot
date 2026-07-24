@@ -7,6 +7,7 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
     
     // Clear input
     inputField.value = '';
+    inputField.style.height = 'auto'; // reset textarea height
     
     // Add user message to chat
     appendMessage(message, 'user-message');
@@ -37,12 +38,39 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
         
     } catch (error) {
         removeElement(typingId);
-        appendMessage('Sorry, there was an error processing your request. Is the backend running?', 'bot-message');
+        appendBotMessage({
+            answer: 'Sorry, there was an error processing your request. Is the backend running?',
+            is_in_scope: true,
+            sources: []
+        });
     }
 });
 
+// Auto-resize textarea
+const tx = document.getElementById('user-input');
+tx.setAttribute('style', 'height:' + (tx.scrollHeight) + 'px;overflow-y:hidden;');
+tx.addEventListener("input", OnInput, false);
+
+// Press Enter to submit (Shift+Enter for newline)
+tx.addEventListener("keydown", function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+    }
+});
+
+function OnInput() {
+  this.style.height = 'auto';
+  this.style.height = (this.scrollHeight) + 'px';
+  if (this.scrollHeight > 200) {
+      this.style.overflowY = 'auto';
+  } else {
+      this.style.overflowY = 'hidden';
+  }
+}
+
 function appendMessage(text, className) {
-    const chatContainer = document.getElementById('chat-container');
+    const chatContent = document.querySelector('.chat-content');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${className}`;
     
@@ -50,34 +78,43 @@ function appendMessage(text, className) {
     contentDiv.className = 'message-content';
     contentDiv.textContent = text;
     
+    // Add dummy avatar for HTML structure compatibility (hidden in CSS for user)
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'avatar';
+    
+    messageDiv.appendChild(avatarDiv);
     messageDiv.appendChild(contentDiv);
-    chatContainer.appendChild(messageDiv);
+    chatContent.appendChild(messageDiv);
     scrollToBottom();
 }
 
 function appendBotMessage(data) {
-    const chatContainer = document.getElementById('chat-container');
+    const chatContent = document.querySelector('.chat-content');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message bot-message';
     
     const avatarDiv = document.createElement('div');
     avatarDiv.className = 'avatar';
-    avatarDiv.textContent = '🤖';
+    avatarDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2Z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg>`;
     
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
     
-    // Parse markdown-like bold (very basic)
+    // Parse basic markdown formatting
     let formattedText = data.answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    formattedText = formattedText.replace(/\n/g, '<br>');
     
-    contentDiv.innerHTML = formattedText;
+    // Split into paragraphs based on newlines
+    const paragraphs = formattedText.split('\n').filter(p => p.trim() !== '');
+    paragraphs.forEach(p => {
+        const pTag = document.createElement('p');
+        pTag.innerHTML = p;
+        contentDiv.appendChild(pTag);
+    });
     
     // Add sources if available
     if (data.sources && data.sources.length > 0) {
         const sourcesDiv = document.createElement('div');
         sourcesDiv.className = 'sources';
-        sourcesDiv.textContent = 'Sources: ';
         
         data.sources.forEach(source => {
             const span = document.createElement('span');
@@ -91,21 +128,19 @@ function appendBotMessage(data) {
     
     if (!data.is_in_scope) {
         const scopeWarning = document.createElement('div');
-        scopeWarning.style.marginTop = '10px';
-        scopeWarning.style.color = '#ef4444';
-        scopeWarning.style.fontSize = '0.8rem';
+        scopeWarning.className = 'out-of-scope-warning';
         scopeWarning.textContent = '⚠️ Out of Scope';
         contentDiv.appendChild(scopeWarning);
     }
     
     messageDiv.appendChild(avatarDiv);
     messageDiv.appendChild(contentDiv);
-    chatContainer.appendChild(messageDiv);
+    chatContent.appendChild(messageDiv);
     scrollToBottom();
 }
 
 function showTypingIndicator() {
-    const chatContainer = document.getElementById('chat-container');
+    const chatContent = document.querySelector('.chat-content');
     const typingId = 'typing-' + Date.now();
     
     const typingDiv = document.createElement('div');
@@ -113,7 +148,9 @@ function showTypingIndicator() {
     typingDiv.id = typingId;
     
     typingDiv.innerHTML = `
-        <div class="avatar">🤖</div>
+        <div class="avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2Z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg>
+        </div>
         <div class="message-content">
             <div class="typing-indicator">
                 <div class="dot"></div>
@@ -123,7 +160,7 @@ function showTypingIndicator() {
         </div>
     `;
     
-    chatContainer.appendChild(typingDiv);
+    chatContent.appendChild(typingDiv);
     scrollToBottom();
     return typingId;
 }
@@ -137,14 +174,17 @@ function removeElement(id) {
 
 function scrollToBottom() {
     const chatContainer = document.getElementById('chat-container');
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'smooth'
+    });
 }
 
 document.getElementById('clear-btn').addEventListener('click', () => {
-    const chatContainer = document.getElementById('chat-container');
-    const welcomeMessage = chatContainer.firstElementChild;
-    chatContainer.innerHTML = '';
+    const chatContent = document.querySelector('.chat-content');
+    const welcomeMessage = chatContent.firstElementChild;
+    chatContent.innerHTML = '';
     if (welcomeMessage) {
-        chatContainer.appendChild(welcomeMessage);
+        chatContent.appendChild(welcomeMessage);
     }
 });
