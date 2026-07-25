@@ -39,7 +39,7 @@ def run_evaluation():
     passed = 0
     total = len(TEST_CASES)
     
-    csv_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "eval_results.csv")
+    csv_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "eval_results_final.csv")
     
     with open(csv_file, mode="w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)

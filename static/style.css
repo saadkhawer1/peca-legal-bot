@@ -29,9 +29,84 @@ body {
 
 .app-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     height: 100%;
     width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-main);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    margin-bottom: 32px;
+    padding-top: 8px;
+}
+
+.analyze-logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #FFFFFF, #A0A0A0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+}
+
+.sidebar-subtitle {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.suggested-queries {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.suggested-q {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.suggested-q svg {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.suggested-q:hover {
+    background-color: var(--btn-hover);
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+    position: relative;
 }
 
 /* Header */
@@ -281,22 +356,28 @@ body {
 }
 
 #send-btn {
-    background: #E3E3E3;
-    color: #1E1E1F;
+    background: var(--text-primary);
+    color: var(--bg-main);
     border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: opacity 0.2s;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.1s;
 }
 
 #send-btn:hover {
     opacity: 0.9;
+}
+#send-btn:active {
+    transform: scale(0.97);
 }
 
 .footer-text {

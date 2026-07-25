@@ -9,7 +9,35 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Top bar -->
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="analyze-logo">ANALYZE</h2>
+                <div class="sidebar-subtitle">PECA 2016 Intelligence</div>
+            </div>
+            <div class="suggested-queries">
+                <button class="suggested-q" data-q="What is the punishment for cyber terrorism?">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Cyber Terrorism
+                </button>
+                <button class="suggested-q" data-q="What constitutes the offense of cyber stalking?">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Cyber Stalking
+                </button>
+                <button class="suggested-q" data-q="What is the penalty for electronic forgery?">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Electronic Forgery
+                </button>
+                <button class="suggested-q" data-q="Does this law apply if the server is hosted in another country but targets Pakistanis?">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    International Jurisdiction
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top bar -->
         <header class="app-header">
             <div class="model-selector">
                 <span class="model-name">PECA 2016 AI</span>
@@ -48,7 +76,7 @@
                         </button>
                         <textarea id="user-input" placeholder="Message PECA AI..." rows="1" required></textarea>
                         <button type="submit" id="send-btn" title="Send message">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            Analyze
                         </button>
                     </div>
                     <div class="footer-text">
@@ -57,6 +85,7 @@
                 </form>
             </div>
         </footer>
+        </div>
     </div>
     <script src="/static/script.js"></script>
 </body>

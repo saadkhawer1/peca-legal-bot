@@ -100,43 +100,82 @@ function appendBotMessage(data) {
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
     
-    // Parse basic markdown formatting
-    let formattedText = data.answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Split into paragraphs based on newlines
-    const paragraphs = formattedText.split('\n').filter(p => p.trim() !== '');
-    paragraphs.forEach(p => {
-        const pTag = document.createElement('p');
-        pTag.innerHTML = p;
-        contentDiv.appendChild(pTag);
-    });
-    
-    // Add sources if available
-    if (data.sources && data.sources.length > 0) {
-        const sourcesDiv = document.createElement('div');
-        sourcesDiv.className = 'sources';
-        
-        data.sources.forEach(source => {
-            const span = document.createElement('span');
-            span.className = 'source-tag';
-            span.textContent = source;
-            sourcesDiv.appendChild(span);
-        });
-        
-        contentDiv.appendChild(sourcesDiv);
-    }
-    
-    if (!data.is_in_scope) {
-        const scopeWarning = document.createElement('div');
-        scopeWarning.className = 'out-of-scope-warning';
-        scopeWarning.textContent = '⚠️ Out of Scope';
-        contentDiv.appendChild(scopeWarning);
-    }
-    
     messageDiv.appendChild(avatarDiv);
     messageDiv.appendChild(contentDiv);
     chatContent.appendChild(messageDiv);
-    scrollToBottom();
+    
+    // Parse basic markdown formatting
+    let formattedText = data.answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    let htmlContent = '';
+    let i = 0;
+    
+    // Create a container for text so sources can be appended later safely
+    const textContainer = document.createElement('div');
+    contentDiv.appendChild(textContainer);
+    
+    function typeNextChar() {
+        if (i < formattedText.length) {
+            let char = formattedText.charAt(i);
+            
+            if (char === '<') {
+                let closeIndex = formattedText.indexOf('>', i);
+                if (closeIndex !== -1) {
+                    htmlContent += formattedText.substring(i, closeIndex + 1);
+                    i = closeIndex + 1;
+                } else {
+                    htmlContent += char;
+                    i++;
+                }
+            } else if (char === '\n') {
+                htmlContent += '<br>';
+                i++;
+                // Add an extra line break for paragraph spacing
+                if (formattedText.charAt(i) === '\n') {
+                    htmlContent += '<br>';
+                    i++;
+                }
+            } else {
+                htmlContent += char;
+                i++;
+            }
+            
+            textContainer.innerHTML = htmlContent;
+            scrollToBottom();
+            setTimeout(typeNextChar, 15); // 15ms per character for GPT-like speed
+        } else {
+            appendMetadata();
+        }
+    }
+    
+    function appendMetadata() {
+        // Add sources if available
+        if (data.sources && data.sources.length > 0) {
+            const sourcesDiv = document.createElement('div');
+            sourcesDiv.className = 'sources';
+            sourcesDiv.style.marginTop = '16px';
+            
+            data.sources.forEach(source => {
+                const span = document.createElement('span');
+                span.className = 'source-tag';
+                span.textContent = source;
+                sourcesDiv.appendChild(span);
+            });
+            
+            contentDiv.appendChild(sourcesDiv);
+        }
+        
+        if (!data.is_in_scope) {
+            const scopeWarning = document.createElement('div');
+            scopeWarning.className = 'out-of-scope-warning';
+            scopeWarning.textContent = '⚠️ Out of Scope';
+            contentDiv.appendChild(scopeWarning);
+        }
+        scrollToBottom();
+    }
+    
+    // Start typing effect
+    typeNextChar();
 }
 
 function showTypingIndicator() {
@@ -187,4 +226,17 @@ document.getElementById('clear-btn').addEventListener('click', () => {
     if (welcomeMessage) {
         chatContent.appendChild(welcomeMessage);
     }
+});
+
+// Sidebar Quick Questions
+document.querySelectorAll('.suggested-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const query = btn.getAttribute('data-q');
+        const inputField = document.getElementById('user-input');
+        inputField.value = query;
+        // Adjust height and dispatch submit
+        inputField.style.height = 'auto';
+        inputField.style.height = (inputField.scrollHeight) + 'px';
+        document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+    });
 });

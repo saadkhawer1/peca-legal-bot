@@ -35,8 +35,8 @@ def classify_query(state: GraphState) -> GraphState:
     query = state["query"]
     
     prompt = PromptTemplate(
-        template="""You are a legal classifier. Determine if the following user query is asking about "The Prevention of Electronic Crimes Act, 2016" (PECA) of Pakistan, cybercrimes, or related legal matters.
-        If the query is a general knowledge question (e.g., "what is chemistry?", "how to bake a cake") or about unrelated laws, classify it as out of scope.
+        template="""You are a legal classifier. Determine if the following user query is asking about "The Prevention of Electronic Crimes Act, 2016" (PECA) of Pakistan, cybercrimes, digital/electronic signatures, unauthorized access, or related legal matters.
+        If the query is a general knowledge question (e.g., "what is chemistry?", "how to bake a cake") or about entirely unrelated laws, classify it as out of scope.
         
         Query: {query}
         """,
