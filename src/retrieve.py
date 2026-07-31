@@ -9,14 +9,17 @@ from src.models import RetrievedChunk
 
 DB_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "chroma_db")
 
-def get_retriever():
+def get_retriever():   
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     db = Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
     return db.as_retriever(search_kwargs={"k": 4})
 
-# use in graph.py
+# convert the user question into number called vectors using embedding model
 def retrieve(query: str, k: int = 20) -> List[RetrievedChunk]:
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+
+    #semantic search in chroma db
     db = Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
     
     # We use similarity_search_with_score to potentially use score-based gating
@@ -33,7 +36,7 @@ def retrieve(query: str, k: int = 20) -> List[RetrievedChunk]:
         ))
         
     return chunks
-
+6
 if __name__ == "__main__":
     # Task 4 test
     test_questions = [
